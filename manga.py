@@ -41,9 +41,12 @@ if ch == "y" or ch == "yes":
 		img_tag = img_block.find("img")["src"]
 		img_url = "https:" + img_tag
 		ext = img_url[img_url.rfind("."):]
+		img_name = chapter_path + "/" + str(i) + ext
+		if os.path.exists(img_name):
+			print ("Progress: Page "+str(i)+" of "+str(last_page))
+			continue
 		img_data = requests.get(img_url)
 		img = Image.open(BytesIO(img_data.content))
-		img_name = chapter_path + "/" + str(i) + ext
 		img.save(img_name)
 		print ("Progress: Page "+str(i)+" of "+str(last_page))
 	print "Download complete"
