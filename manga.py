@@ -4,7 +4,9 @@ Downloading content via this script may be illegal in your country. I am not to 
 Please support the official releases """
 
 import requests
+import glob
 import os
+import subprocess
 from bs4 import BeautifulSoup
 from PIL import Image
 from io import BytesIO
@@ -32,8 +34,15 @@ if ch == "y" or ch == "yes":
 	chapter_url = url + chapter +"/"
 	page1_data  = requests.get(chapter_url).content
 	soup2 = BeautifulSoup(page1_data, "lxml")
-	last_page = int(soup2.find_all("option")[-1].get_text()) 
+	last_page = int(soup2.find_all("option")[-1].get_text())
+	img_block = soup2.find("a",{"id":"nextA"})
+	img_tag = img_block.find("img")["src"]
+	img_url = "https:" + img_tag
+	ext1 = img_url[img_url.rfind("."):]
 	for i in range(1,last_page+1):
+		if glob.glob(chapter_path + "/" + str(i) + "*"):
+			print ("Progress: Page "+str(i)+" of "+str(last_page))
+			continue
 		page_url = chapter_url + str(i)
 		page_data = requests.get(page_url).content
 		soup3 = BeautifulSoup(page_data,"lxml")
@@ -42,9 +51,6 @@ if ch == "y" or ch == "yes":
 		img_url = "https:" + img_tag
 		ext = img_url[img_url.rfind("."):]
 		img_name = chapter_path + "/" + str(i) + ext
-		if os.path.exists(img_name):
-			print ("Progress: Page "+str(i)+" of "+str(last_page))
-			continue
 		img_data = requests.get(img_url)
 		img = Image.open(BytesIO(img_data.content))
 		img.save(img_name)
@@ -53,8 +59,7 @@ if ch == "y" or ch == "yes":
 	ch = raw_input("\nDo you want to open the chapter? yes or no\n> ")
 	if ch == "y" or ch == "yes":
 		print "Opening chapter"
-		image = Image.open(chapter_path + "/1" + ext)
-		image.show()
+		subprocess.call(["eog", chapter_path + "/1" + ext1])
 	elif ch == "n" or ch == "no":
 		exit()
 	else:
