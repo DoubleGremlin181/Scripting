@@ -35,12 +35,8 @@ if ch == "y" or ch == "yes":
 	page1_data  = requests.get(chapter_url).content
 	soup2 = BeautifulSoup(page1_data, "lxml")
 	last_page = int(soup2.find_all("option")[-1].get_text())
-	img_block = soup2.find("a",{"id":"nextA"})
-	img_tag = img_block.find("img")["src"]
-	img_url = "https:" + img_tag
-	ext1 = img_url[img_url.rfind("."):]
 	for i in range(1,last_page+1):
-		if glob.glob(chapter_path + "/" + str(i) + "*"):
+		if glob.glob(chapter_path + "/" + str(i) + "*") and i != 1:
 			print ("Progress: Page "+str(i)+" of "+str(last_page))
 			continue
 		page_url = chapter_url + str(i)
@@ -50,6 +46,8 @@ if ch == "y" or ch == "yes":
 		img_tag = img_block.find("img")["src"]
 		img_url = "https:" + img_tag
 		ext = img_url[img_url.rfind("."):]
+		if i == 1:
+			ext1 = ext
 		img_name = chapter_path + "/" + str(i) + ext
 		img_data = requests.get(img_url)
 		img = Image.open(BytesIO(img_data.content))
