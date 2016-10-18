@@ -11,8 +11,14 @@ from bs4 import BeautifulSoup
 from PIL import Image
 from io import BytesIO
 
-def extractData(url):
-    page = requests.get(url).content
+def mangaURL(n):
+    base_url = "http://www.mangaeden.com/en/en-manga/"
+    name = n.lower().strip().replace(' ','-')
+    return base_url + name + "/"
+
+
+def extractData(manga_url):
+    page = requests.get(manga_url).content
     soup = BeautifulSoup(page, "lxml")
     return soup
 
@@ -46,7 +52,7 @@ def downloadImage(page_no,chapter_path,chapter_url,last_page):
     print ("Progress: Page "+str(page_no)+" of "+str(last_page))
     pass
 
-def downloadChapter(n,url):
+def downloadChapter(n,manga_url):
     chapter_path=""
     chapter_url=""
     last_page=""
@@ -55,7 +61,7 @@ def downloadChapter(n,url):
     chapter = raw_input("Enter the chapter number\n> ")
     chapter_path = n + "/" + chapter
     makeFolder(chapter_path)
-    chapter_url = url + chapter +"/"
+    chapter_url = manga_url + chapter +"/"
     page1_data = extractData(chapter_url)
     last_page = int(page1_data.find_all("option")[-1].get_text())
     for i in range(1, last_page + 1):
@@ -77,19 +83,16 @@ def open(chapter_path):
 
 def main():
     n =""
-    url = ""
-    base_url = "http://www.mangaeden.com/en/en-manga/"
     n = raw_input("Enter the name of the manga\n> ")
-    name = n.lower().strip().replace(' ','-')
-    url = base_url + name + "/"
-    desc = extractData(url)
+    manga_url = mangaURL(n)
+    desc = extractData(manga_url)
     if desc.title.string == "\n404 NOT FOUND - Manga Eden\n":
     	print "404 NOT FOUND"
     	exit()
     mangaDescription(desc,n)
     ch = raw_input("Do you want to download a chapter?\n> ")
     if ch == "y" or ch == "yes":
-        downloadChapter(n,url)
+        downloadChapter(n,manga_url)
     elif ch == "n" or ch == "no":
     	exit()
     else:
