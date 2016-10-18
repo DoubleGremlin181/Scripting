@@ -16,7 +16,7 @@ def extractData(url):
     soup = BeautifulSoup(page, "lxml")
     return soup
 
-def mangaDescription(desc_page):
+def mangaDescription(desc_page,n):
     mangaDescription = desc_page.find("h2",{"id":"mangaDescription"}).string
     print "\nManga Description:\n" + mangaDescription
     pass
@@ -26,18 +26,18 @@ def makeFolder(path):
 		os.mkdir( path, 0755 )
     pass
 
-def imageURL(page):
-    page_url = chapter_url + str(page)
+def imageURL(page_no,chapter_url):
+    page_url = chapter_url + str(page_no)
     page_data = extractData(page_url)
     img_block = page_data.find("a",{"id":"nextA"})
     img_tag = img_block.find("img")["src"]
     return "https:" + img_tag
 
-def downloadImage(page_no):
+def downloadImage(page_no,chapter_path,chapter_url,last_page):
     if glob.glob(chapter_path + "/" + str(page_no) + "*") and page_no != 1:
         print ("Progress: Page "+str(page_no)+" of "+str(last_page))
         return
-    img_url = imageURL(page_no)
+    img_url = imageURL(page_no,chapter_url)
     ext = img_url[img_url.rfind("."):]
     img_name = chapter_path + "/" + str(page_no) + ext
     img_data = requests.get(img_url)
@@ -46,8 +46,10 @@ def downloadImage(page_no):
     print ("Progress: Page "+str(page_no)+" of "+str(last_page))
     pass
 
-def downloadChapter():
-    global chapter_path, chapter_url, last_page
+def downloadChapter(n,url):
+    chapter_path=""
+    chapter_url=""
+    last_page=""
 
     makeFolder(n)
     chapter = raw_input("Enter the chapter number\n> ")
@@ -57,12 +59,12 @@ def downloadChapter():
     page1_data = extractData(chapter_url)
     last_page = int(page1_data.find_all("option")[-1].get_text())
     for i in range(1, last_page + 1):
-        downloadImage(i)
+        downloadImage(i,chapter_path,chapter_url,last_page)
     print "Download complete"
-    open()
+    open(chapter_path)
     pass
 
-def open():
+def open(chapter_path):
     ch = raw_input("\nDo you want to open the chapter? yes or no\n> ")
     if ch == "y" or ch == "yes":
         print "Opening chapter"
@@ -74,8 +76,8 @@ def open():
     pass
 
 def main():
-    global n, url
-
+    n =""
+    url = ""
     base_url = "http://www.mangaeden.com/en/en-manga/"
     n = raw_input("Enter the name of the manga\n> ")
     name = n.lower().strip().replace(' ','-')
@@ -84,10 +86,10 @@ def main():
     if desc.title.string == "\n404 NOT FOUND - Manga Eden\n":
     	print "404 NOT FOUND"
     	exit()
-    mangaDescription(desc)
+    mangaDescription(desc,n)
     ch = raw_input("Do you want to download a chapter?\n> ")
     if ch == "y" or ch == "yes":
-        downloadChapter()
+        downloadChapter(n,url)
     elif ch == "n" or ch == "no":
     	exit()
     else:
@@ -96,4 +98,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
