@@ -1,3 +1,3 @@
-# Scripting
+# manga-dl
 
-Just some basic scripts.
+A script to download manga via http://www.mangaeden.com/
